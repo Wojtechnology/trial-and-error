@@ -1,0 +1,33 @@
+atari-py==0.1.1
+bleach==1.5.0
+Box2D-kengz==2.3.3
+certifi==2017.11.5
+chardet==3.0.4
+enum34==1.1.6
+future==0.16.0
+-e git+https://github.com/openai/gym@efeadfdd20992aeba69e038205af90d340c5f95b#egg=gym
+-e git+https://github.com/lusob/gym-ple.git@3e35d653d6a27794f0d88a1c4e55dc820bfe1301#egg=gym_ple
+html5lib==0.9999999
+idna==2.6
+imageio==2.2.0
+Keras==2.1.2
+Markdown==2.6.10
+mujoco-py==0.5.7
+numpy==1.13.3
+olefile==0.44
+pachi-py==0.0.21
+Pillow==4.3.0
+-e git+https://github.com/ntasfi/PyGame-Learning-Environment.git@50aa299a3b519029f3fd123b4cce6d34edbfa0dc#egg=ple
+protobuf==3.5.0.post1
+pygame==1.9.3
+pyglet==1.3.0
+PyOpenGL==3.1.0
+PyYAML==3.12
+requests==2.18.4
+scipy==1.0.0
+six==1.11.0
+tensorflow==1.4.1
+tensorflow-tensorboard==0.4.0rc3
+Theano==1.0.1
+urllib3==1.22
+Werkzeug==0.13
