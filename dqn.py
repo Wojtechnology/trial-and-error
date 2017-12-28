@@ -38,8 +38,9 @@ class DeepQNetwork(object):
     def train(
             self,
             gamma=0.9,
-            epsilon=(1., 0.),
-            episodes=1000,
+            epsilon=(1., 0.1),
+            epsilon_decay_steps=100000,
+            episodes=10000,
             batch_size=32):
         """
         Trains the model using the given hyperparameters.
@@ -54,9 +55,11 @@ class DeepQNetwork(object):
         # TODO: maybe make into parameter after
         explore_steps = memory.maxlen()
         # TODO: Right now assumes linear decay
-        e = 1.0
+        e = epsilon[0]
+        e_decay = (epsilon[1] - epsilon[0]) / epsilon_decay_steps
         steps = 0
         loss = 0.0
+        q_max = 0.0
 
         for epi in range(1, episodes+1):
             done = False
@@ -79,12 +82,15 @@ class DeepQNetwork(object):
 
                 if steps >= explore_steps:
                     # Train model on random sample from
-                    loss += self._train_on_batch(gamma, batch_size)
+                    l, q_m = self._train_on_batch(gamma, batch_size)
+                    loss += l
+                    q_max += q_m
 
                     if steps % 100 == 0:
-                        print('Steps: {}, Avg Loss: {}, Episode: {}, e: {}'.format(
-                            steps, loss/100, epi, e))
+                        print('Steps: {}, Avg Loss: {}, Episode: {}, e: {}, q_max: {}'.format(
+                            steps, loss/100, epi, e, q_max/100))
                         loss = 0.0
+                        q_max = 0.0
 
                     if steps % 1000 == 0:
                         model.save_weights('data/weights{}.dat'.format(steps))
@@ -92,11 +98,15 @@ class DeepQNetwork(object):
                 steps += 1
 
                 if steps == explore_steps:
-                    e = epsilon[0]
-                    e_decay = (epsilon[0] - epsilon[1]) / (episodes - epi)
+                    q_measure_sample = memory.sample(1000)
+                    q_measure_sample = np.array([s for s, _, _, _, _ in q_measure_sample])
 
-            if steps >= explore_steps:
-                e -= e_decay
+                if steps >= explore_steps and steps % 1000 == 0:
+                    q = model.predict(q_measure_sample)
+                    print('Q measure: {}'.format(np.max(q, axis=1).mean()))
+
+                if steps >= explore_steps and e > epsilon[1]:
+                    e += e_decay
 
         model.save_weights('data/weights.dat')
 
@@ -127,7 +137,7 @@ class DeepQNetwork(object):
         if np.isnan(loss):
             raise Exception('loss is nan')
 
-        return loss
+        return loss, np.max(q[:batch_size], axis=1).mean()
 
     def play(self, visualize=True):
         model = self.model
