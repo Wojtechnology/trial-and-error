@@ -39,7 +39,7 @@ class DeepQNetwork(object):
             self,
             gamma=0.9,
             epsilon=(1., 0.),
-            episodes=60,
+            episodes=1000,
             batch_size=32):
         """
         Trains the model using the given hyperparameters.
@@ -54,12 +54,11 @@ class DeepQNetwork(object):
         # TODO: maybe make into parameter after
         explore_steps = memory.maxlen()
         # TODO: Right now assumes linear decay
-        e = epsilon[0]
-        e_decay = (epsilon[0] - epsilon[1]) / episodes
+        e = 1.0
         steps = 0
         loss = 0.0
 
-        for epi in range(episodes):
+        for epi in range(1, episodes+1):
             done = False
             s = env.reset()
 
@@ -88,14 +87,18 @@ class DeepQNetwork(object):
                         loss = 0.0
 
                     if steps % 1000 == 0:
-                        model.save_weights('weights.dat')
+                        model.save_weights('data/weights{}.dat'.format(steps))
 
                 steps += 1
 
-            # TODO: Only when no longer only exploring
-            e -= e_decay
+                if steps == explore_steps:
+                    e = epsilon[0]
+                    e_decay = (epsilon[0] - epsilon[1]) / (episodes - epi)
 
-        model.save_weights('weights.dat')
+            if steps >= explore_steps:
+                e -= e_decay
+
+        model.save_weights('data/weights.dat')
 
     def _train_on_batch(self, gamma, batch_size):
         model = self.model
@@ -126,5 +129,16 @@ class DeepQNetwork(object):
 
         return loss
 
-    def play(self):
-        pass
+    def play(self, visualize=True):
+        model = self.model
+        env = self.env
+
+        done = False
+        s = env.reset()
+        while not done:
+            q = model.predict(np.array([s]))
+            a = int(np.argmax(q[0]))
+
+            env.render()
+            s, r, done, _ = env.step(a)
+            print(r)
