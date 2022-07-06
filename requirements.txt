@@ -8,7 +8,7 @@ future==0.16.0
 -e git+https://github.com/openai/gym@efeadfdd20992aeba69e038205af90d340c5f95b#egg=gym
 -e git+https://github.com/lusob/gym-ple.git@3e35d653d6a27794f0d88a1c4e55dc820bfe1301#egg=gym_ple
 h5py==2.7.1
-html5lib==0.9999999
+html5lib==0.999999999
 idna==2.6
 imageio==2.2.0
 Keras==2.1.2
